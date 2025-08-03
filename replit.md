@@ -38,9 +38,14 @@ Preferred communication style: Simple, everyday language.
 - **Conflict Resolution**: Subjects with identical names are automatically scheduled on the same date regardless of different codes
 
 ### External Dependencies
-- **Database**: Neon PostgreSQL for serverless database hosting
+- **Database**: PostgreSQL with Neon serverless driver for database hosting
 - **File Storage**: In-memory processing for Excel files with Multer
-- **PDF Generation**: Puppeteer with Chrome headless for PDF export
+- **PDF Generation**: PDFKit for native PDF creation (replaced Puppeteer to eliminate Chrome dependencies)
 - **UI Components**: Radix UI for accessible component primitives
 - **Validation**: Zod for runtime type checking and form validation
-- **Development Tools**: Replit integration for development environment
+- **Development Tools**: VS Code configuration and Replit integration
+
+### Recent Changes
+- **PDF Generation Fix (Aug 2025)**: Replaced Puppeteer with PDFKit to resolve Chrome dependency issues and provide exact format matching for Chennai Institute of Technology layout
+- **VS Code Setup**: Added comprehensive setup guide, environment configuration, and debugging support for local development
+- **Database Migration**: Enhanced PostgreSQL setup with proper environment variable configuration

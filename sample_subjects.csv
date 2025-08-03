@@ -1,0 +1,30 @@
+Subject Code,Subject Name,Department,Year
+CS101,Programming Fundamentals,CSE,1
+CS102,Data Structures,CSE,1
+MA101,Engineering Mathematics-I,CSE,1
+PH101,Engineering Physics,CSE,1
+EE101,Basic Electrical Engineering,CSE,1
+ME101,Engineering Mechanics,CSE,1
+CS201,Object Oriented Programming,CSE,2
+CS202,Database Management Systems,CSE,2
+MA201,Engineering Mathematics-II,CSE,2
+CS203,Computer Networks,CSE,2
+CS204,Operating Systems,CSE,2
+ECE101,Electronic Devices and Circuits,ECE,1
+ECE102,Digital Electronics,ECE,1
+MA101,Engineering Mathematics-I,ECE,1
+PH101,Engineering Physics,ECE,1
+EE101,Basic Electrical Engineering,ECE,1
+ECE201,Analog Circuits,ECE,2
+ECE202,Microprocessors,ECE,2
+ECE203,Signals and Systems,ECE,2
+MA201,Engineering Mathematics-II,ECE,2
+ME101,Engineering Drawing,MECH,1
+ME102,Engineering Materials,MECH,1
+MA101,Engineering Mathematics-I,MECH,1
+PH101,Engineering Physics,MECH,1
+ME103,Thermodynamics,MECH,1
+ME201,Fluid Mechanics,MECH,2
+ME202,Machine Design,MECH,2
+ME203,Manufacturing Technology,MECH,2
+MA201,Engineering Mathematics-II,MECH,2
