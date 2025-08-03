@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Save, HelpCircle } from "lucide-react";
+import { Calendar, Save, HelpCircle, BookOpen } from "lucide-react";
+import { Link } from "wouter";
 import BasicInformationForm from "@/components/BasicInformationForm";
 import DepartmentSelection from "@/components/DepartmentSelection";
 import SubjectManagement from "@/components/SubjectManagement";
@@ -76,6 +77,12 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <Link href="/subject-library">
+                <Button variant="outline" size="sm">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Subject Library
+                </Button>
+              </Link>
               <Button variant="ghost" size="sm">
                 <HelpCircle className="h-4 w-4" />
               </Button>

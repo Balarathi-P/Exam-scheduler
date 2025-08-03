@@ -14,10 +14,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Subject routes
   app.get("/api/subjects", async (req, res) => {
     try {
-      const subjects = await storage.getSubjects();
+      const { department, year } = req.query;
+      const subjects = await storage.getSubjects(
+        department as string, 
+        year as string
+      );
       res.json(subjects);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch subjects" });
+    }
+  });
+
+  app.get("/api/subjects/departments", async (req, res) => {
+    try {
+      const departments = await storage.getDepartments();
+      res.json(departments);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch departments" });
+    }
+  });
+
+  app.get("/api/subjects/stats", async (req, res) => {
+    try {
+      const stats = await storage.getSubjectStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch subject statistics" });
     }
   });
 

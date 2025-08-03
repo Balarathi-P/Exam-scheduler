@@ -11,10 +11,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { FileSpreadsheet, Plus, Trash2, Upload } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FileSpreadsheet, Plus, Trash2, Upload, BookOpen, Search } from "lucide-react";
 import { TimetableData } from "@/pages/home";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Subject } from "@shared/schema";
 
@@ -39,9 +48,38 @@ export default function SubjectManagement({
     year: "",
   });
   const [showImportArea, setShowImportArea] = useState(false);
+  const [showLibraryDialog, setShowLibraryDialog] = useState(false);
+  const [librarySearchTerm, setLibrarySearchTerm] = useState("");
+  const [selectedLibraryDept, setSelectedLibraryDept] = useState<string>("all");
+  const [selectedLibraryYear, setSelectedLibraryYear] = useState<string>("all");
+  const [selectedLibrarySubjects, setSelectedLibrarySubjects] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch library subjects
+  const { data: librarySubjects = [], isLoading: libraryLoading } = useQuery<Subject[]>({
+    queryKey: ["library-subjects", selectedLibraryDept === "all" ? undefined : selectedLibraryDept, selectedLibraryYear === "all" ? undefined : selectedLibraryYear],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedLibraryDept !== "all") params.append("department", selectedLibraryDept);
+      if (selectedLibraryYear !== "all") params.append("year", selectedLibraryYear);
+      
+      const response = await apiRequest("GET", `/api/subjects?${params.toString()}`);
+      return response.json();
+    },
+    enabled: showLibraryDialog,
+  });
+
+  // Fetch departments for library
+  const { data: libraryDepartments = [] } = useQuery<string[]>({
+    queryKey: ["departments"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/subjects/departments");
+      return response.json();
+    },
+    enabled: showLibraryDialog,
+  });
 
   const createSubjectMutation = useMutation({
     mutationFn: (subject: any) => apiRequest("POST", "/api/subjects", subject),
@@ -161,6 +199,53 @@ export default function SubjectManagement({
     onNext();
   };
 
+  const filteredLibrarySubjects = librarySubjects.filter(subject =>
+    subject.code.toLowerCase().includes(librarySearchTerm.toLowerCase()) ||
+    subject.name.toLowerCase().includes(librarySearchTerm.toLowerCase())
+  );
+
+  const handleLibrarySubjectToggle = (subjectId: string) => {
+    setSelectedLibrarySubjects(prev => 
+      prev.includes(subjectId) 
+        ? prev.filter(id => id !== subjectId)
+        : [...prev, subjectId]
+    );
+  };
+
+  const handleLoadFromLibrary = () => {
+    const subjectsToAdd = librarySubjects.filter(subject => 
+      selectedLibrarySubjects.includes(subject.id)
+    );
+    
+    // Filter out subjects that are already added
+    const newSubjects = subjectsToAdd.filter(libSubject => 
+      !data.subjects.some(existingSubject => existingSubject.id === libSubject.id)
+    );
+
+    if (newSubjects.length === 0) {
+      toast({
+        title: "Info",
+        description: "Selected subjects are already added",
+      });
+      return;
+    }
+
+    updateData({
+      subjects: [...data.subjects, ...newSubjects],
+    });
+
+    toast({
+      title: "Success",
+      description: `${newSubjects.length} subjects loaded from library`,
+    });
+
+    setShowLibraryDialog(false);
+    setSelectedLibrarySubjects([]);
+    setLibrarySearchTerm("");
+    setSelectedLibraryDept("all");
+    setSelectedLibraryYear("all");
+  };
+
   const getDepartmentColor = (dept: string) => {
     const colors: Record<string, string> = {
       CSE: "bg-blue-100 text-blue-800",
@@ -185,14 +270,145 @@ export default function SubjectManagement({
             </div>
             <h2 className="text-lg font-semibold text-gray-900">Subject Management</h2>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowImportArea(!showImportArea)}
-            className="flex items-center space-x-2"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            <span>Bulk Import from Excel/CSV</span>
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Dialog open={showLibraryDialog} onOpenChange={setShowLibraryDialog}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="flex items-center space-x-2"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  <span>Load from Library</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Load Subjects from Library</DialogTitle>
+                  <DialogDescription>
+                    Select subjects from your permanent library to add to this timetable
+                  </DialogDescription>
+                </DialogHeader>
+                
+                {/* Library Filters */}
+                <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4 py-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search subjects..."
+                      value={librarySearchTerm}
+                      onChange={(e) => setLibrarySearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Select value={selectedLibraryDept} onValueChange={setSelectedLibraryDept}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Departments</SelectItem>
+                      {libraryDepartments.map(dept => (
+                        <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={selectedLibraryYear} onValueChange={setSelectedLibraryYear}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Years</SelectItem>
+                      <SelectItem value="1">1st Year</SelectItem>
+                      <SelectItem value="2">2nd Year</SelectItem>
+                      <SelectItem value="3">3rd Year</SelectItem>
+                      <SelectItem value="4">4th Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Library Subjects List */}
+                <div className="border rounded-lg max-h-96 overflow-y-auto">
+                  {libraryLoading ? (
+                    <div className="flex items-center justify-center p-8">
+                      <div className="text-gray-500">Loading subjects...</div>
+                    </div>
+                  ) : filteredLibrarySubjects.length === 0 ? (
+                    <div className="text-center p-8">
+                      <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No subjects found</h3>
+                      <p className="text-gray-500">Try adjusting your filters or add subjects to your library first</p>
+                    </div>
+                  ) : (
+                    <div className="p-4 space-y-2">
+                      {filteredLibrarySubjects.map((subject) => {
+                        const isAlreadyAdded = data.subjects.some(s => s.id === subject.id);
+                        return (
+                          <div
+                            key={subject.id}
+                            className={`flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 ${
+                              isAlreadyAdded ? 'opacity-50 bg-gray-100' : ''
+                            }`}
+                          >
+                            <Checkbox
+                              checked={selectedLibrarySubjects.includes(subject.id)}
+                              onCheckedChange={() => handleLibrarySubjectToggle(subject.id)}
+                              disabled={isAlreadyAdded}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-4">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {subject.code}
+                                </div>
+                                <div className="text-sm text-gray-600">{subject.name}</div>
+                                <Badge className={getDepartmentColor(subject.department)}>
+                                  {subject.department}
+                                </Badge>
+                                <Badge variant="secondary">Year {subject.year}</Badge>
+                                {isAlreadyAdded && (
+                                  <Badge variant="outline" className="text-green-600 border-green-600">
+                                    Already Added
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-between items-center pt-4">
+                  <div className="text-sm text-gray-600">
+                    {selectedLibrarySubjects.length} subjects selected
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowLibraryDialog(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleLoadFromLibrary}
+                      disabled={selectedLibrarySubjects.length === 0}
+                      className="bg-primary hover:bg-blue-700"
+                    >
+                      Load Selected Subjects
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Button
+              variant="outline"
+              onClick={() => setShowImportArea(!showImportArea)}
+              className="flex items-center space-x-2"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              <span>Bulk Import from Excel/CSV</span>
+            </Button>
+          </div>
         </div>
 
         {/* Manual Subject Entry */}

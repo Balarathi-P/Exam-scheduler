@@ -13,7 +13,7 @@ import {
   type InsertTimetableSubject
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -21,9 +21,11 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   
   createSubject(subject: InsertSubject): Promise<Subject>;
-  getSubjects(): Promise<Subject[]>;
+  getSubjects(department?: string, year?: string): Promise<Subject[]>;
   deleteSubject(id: string): Promise<void>;
   createMultipleSubjects(subjects: InsertSubject[]): Promise<Subject[]>;
+  getDepartments(): Promise<string[]>;
+  getSubjectStats(): Promise<{ department: string; year: string; count: number }[]>;
   
   createTimetable(timetable: InsertTimetable): Promise<Timetable>;
   getTimetable(id: string): Promise<Timetable | undefined>;
@@ -61,8 +63,39 @@ export class DatabaseStorage implements IStorage {
     return newSubject;
   }
 
-  async getSubjects(): Promise<Subject[]> {
-    return await db.select().from(subjects);
+  async getSubjects(department?: string, year?: string): Promise<Subject[]> {
+    let query = db.select().from(subjects);
+    
+    if (department && year) {
+      query = query.where(and(eq(subjects.department, department), eq(subjects.year, year)));
+    } else if (department) {
+      query = query.where(eq(subjects.department, department));
+    } else if (year) {
+      query = query.where(eq(subjects.year, year));
+    }
+    
+    return await query.orderBy(subjects.department, subjects.year, subjects.code);
+  }
+
+  async getDepartments(): Promise<string[]> {
+    const result = await db
+      .selectDistinct({ department: subjects.department })
+      .from(subjects)
+      .orderBy(subjects.department);
+    return result.map(r => r.department);
+  }
+
+  async getSubjectStats(): Promise<{ department: string; year: string; count: number }[]> {
+    const result = await db
+      .select({
+        department: subjects.department,
+        year: subjects.year,
+        count: sql<number>`count(*)`
+      })
+      .from(subjects)
+      .groupBy(subjects.department, subjects.year)
+      .orderBy(subjects.department, subjects.year);
+    return result;
   }
 
   async deleteSubject(id: string): Promise<void> {
