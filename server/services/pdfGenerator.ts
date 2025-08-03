@@ -1,36 +1,69 @@
 import puppeteer from 'puppeteer';
+// @ts-ignore
+import * as htmlPdf from 'html-pdf-node';
 import { Timetable, TimetableSubject, Subject } from '@shared/schema';
 
 export async function generatePDF(
   timetable: Timetable, 
   timetableSubjects: (TimetableSubject & { subject: Subject })[]
 ): Promise<Buffer> {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+  const html = generateTimetableHTML(timetable, timetableSubjects);
   
   try {
-    const page = await browser.newPage();
+    // Try Puppeteer first
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor'
+      ]
+    });
     
-    const html = generateTimetableHTML(timetable, timetableSubjects);
+    try {
+      const page = await browser.newPage();
+      await page.setContent(html, { waitUntil: 'networkidle0' });
+      
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: {
+          top: '20mm',
+          right: '15mm',
+          bottom: '20mm',
+          left: '15mm'
+        }
+      });
+      
+      return Buffer.from(pdfBuffer);
+    } finally {
+      await browser.close();
+    }
+  } catch (puppeteerError: any) {
+    console.log('Puppeteer failed, trying html-pdf-node fallback:', puppeteerError?.message || puppeteerError);
     
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-    
-    const pdfBuffer = await page.pdf({
+    // Fallback to html-pdf-node
+    const options = {
       format: 'A4',
-      printBackground: true,
       margin: {
         top: '20mm',
         right: '15mm',
         bottom: '20mm',
         left: '15mm'
-      }
-    });
+      },
+      printBackground: true
+    };
     
-    return pdfBuffer;
-  } finally {
-    await browser.close();
+    const file = { content: html };
+    const pdfBuffer = await htmlPdf.generatePdf(file, options);
+    return Buffer.from(pdfBuffer);
   }
 }
 
