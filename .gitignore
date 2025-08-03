@@ -1,6 +1,15 @@
+# Ignore node modules and build artifacts
 node_modules
 dist
-.DS_Store
-server/public
-vite.config.ts.*
 *.tar.gz
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Vite config backup
+vite.config.ts.*
+
+# Ignore static public assets (if you don't want to track them)
+server/public
+
+.env

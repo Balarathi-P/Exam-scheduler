@@ -1,0 +1,619 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Exam Timetable Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#1e40af',
+                        'secondary': '#64748b',
+                        'success': '#059669',
+                        'warning': '#d97706',
+                        'danger': '#dc2626',
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 font-inter">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-primary text-white p-2 rounded-lg">
+                        <i class="fas fa-calendar-alt text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">University Exam Timetable Generator</h1>
+                        <p class="text-sm text-gray-500">Automated Scheduling System</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-question-circle text-lg"></i>
+                    </button>
+                    <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-save mr-2"></i>Save Template
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Form Section -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Progress Steps -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-4">
+                            <!-- @COMPONENT: StepIndicator [step:1, status:active] -->
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">1</div>
+                                <span class="text-sm font-medium text-gray-900">Basic Info</span>
+                            </div>
+                            <!-- @END_COMPONENT: StepIndicator -->
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                            
+                            <!-- @COMPONENT: StepIndicator [step:2, status:active] -->
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                                <span class="text-sm font-medium text-gray-900">Departments</span>
+                            </div>
+                            <!-- @END_COMPONENT: StepIndicator -->
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                            
+                            <!-- @COMPONENT: StepIndicator [step:3, status:active] -->
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                                <span class="text-sm font-medium text-gray-900">Subjects</span>
+                            </div>
+                            <!-- @END_COMPONENT: StepIndicator -->
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                            
+                            <!-- @COMPONENT: StepIndicator [step:4, status:pending] -->
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                                <span class="text-sm font-medium text-gray-500">Schedule</span>
+                            </div>
+                            <!-- @END_COMPONENT: StepIndicator -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Basic Information -->
+                <!-- @COMPONENT: BasicInformationForm [academicYear, semester, examType, referenceNumber] -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center">
+                            <span class="text-sm font-medium">1</span>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Academic Year</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" data-bind="academicYear">
+                                <option>2024-2025</option>
+                                <option>2023-2024</option>
+                                <option>2025-2026</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" data-bind="semester">
+                                <option>Odd Semester</option>
+                                <option>Even Semester</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Exam Type</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" data-bind="examType">
+                                <option>Internal Assessment - II</option>
+                                <option>Internal Assessment - I</option>
+                                <option>Internal Assessment - III</option>
+                                <option>End Semester Exam</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Reference Number</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" 
+                                   placeholder="CIT/COE/2025-26/ODD/04" data-bind="referenceNumber" />
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: BasicInformationForm -->
+
+                <!-- Step 2: Department & Year Selection -->
+                <!-- @COMPONENT: DepartmentSelection [departments, selectedDepartments] -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center">
+                            <span class="text-sm font-medium">2</span>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-900">Department & Year Selection</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Departments</label>
+                            <div class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3">
+                                <!-- @MAP: departments.map(dept => ( -->
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" data-bind="selectedDepartments" />
+                                    <span class="text-sm text-gray-700">CE - Civil Engineering</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" checked />
+                                    <span class="text-sm text-gray-700">CSE - Computer Science Engineering</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" checked />
+                                    <span class="text-sm text-gray-700">IT - Information Technology</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" />
+                                    <span class="text-sm text-gray-700">ECE - Electronics & Communication</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" />
+                                    <span class="text-sm text-gray-700">MECH - Mechanical Engineering</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" />
+                                    <span class="text-sm text-gray-700">EEE - Electrical & Electronics</span>
+                                </label>
+                                <!-- @END_MAP )) -->
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Year/Semester</label>
+                            <div class="space-y-2">
+                                <!-- @MAP: years.map(year => ( -->
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" checked />
+                                    <span class="text-sm text-gray-700">I Year</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" />
+                                    <span class="text-sm text-gray-700">II Year</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" checked />
+                                    <span class="text-sm text-gray-700">III Year</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" />
+                                    <span class="text-sm text-gray-700">IV Year</span>
+                                </label>
+                                <!-- @END_MAP )) -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: DepartmentSelection -->
+
+                <!-- Step 3: Subject Management -->
+                <!-- @COMPONENT: SubjectManagement [subjects, bulkImport] -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center">
+                                <span class="text-sm font-medium">3</span>
+                            </div>
+                            <h2 class="text-lg font-semibold text-gray-900">Subject Management</h2>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button class="flex items-center space-x-2 px-4 py-2 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors" data-event="click:handleBulkImport">
+                                <i class="fas fa-file-excel"></i>
+                                <span>Bulk Import from Excel/CSV</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Manual Subject Entry -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 mb-6">
+                        <h3 class="text-sm font-medium text-gray-700 mb-4">Add Subject Manually</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <input type="text" placeholder="Subject Code (e.g., CS301)" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm" 
+                                       data-bind="newSubject.code" />
+                            </div>
+                            <div>
+                                <input type="text" placeholder="Subject Name (e.g., Data Structures)" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm" 
+                                       data-bind="newSubject.name" />
+                            </div>
+                            <div>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm" data-bind="newSubject.department">
+                                    <option value="">Department</option>
+                                    <option>CSE</option>
+                                    <option>IT</option>
+                                    <option>ECE</option>
+                                    <option>MECH</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium" 
+                                        data-event="click:addSubject">
+                                    <i class="fas fa-plus mr-2"></i>Add Subject
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Excel/CSV Import Area -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 mb-6 hidden" id="importArea">
+                        <div class="text-center">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">Upload Excel/CSV File</h3>
+                            <p class="text-sm text-gray-500 mb-4">Drop your file here or click to browse</p>
+                            <input type="file" accept=".xlsx,.xls,.csv" class="hidden" id="fileInput" />
+                            <button class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors" 
+                                    data-event="click:triggerFileUpload">
+                                Choose File
+                            </button>
+                            <div class="mt-4 text-xs text-gray-500">
+                                <p>Expected format: Subject Code, Subject Name, Department, Year</p>
+                                <a href="#" class="text-primary hover:underline">Download sample template</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Added Subjects List -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-medium text-gray-700">Added Subjects:</h3>
+                            <span class="text-xs text-gray-500" data-bind="subjects.length">2 subjects added</span>
+                        </div>
+                        
+                        <!-- @STATE: subjects:array = [] -->
+                        <div class="space-y-2">
+                            <!-- @MAP: subjects.map(subject => ( -->
+                            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-sm font-medium text-gray-900" data-bind="subject.code">CS301</div>
+                                    <div class="text-sm text-gray-600" data-bind="subject.name">Data Structures</div>
+                                    <div class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full" data-bind="subject.department">CSE</div>
+                                    <div class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full" data-bind="subject.year">III Year</div>
+                                </div>
+                                <button class="text-red-500 hover:text-red-700 transition-colors" data-event="click:removeSubject">
+                                    <i class="fas fa-trash text-sm"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-sm font-medium text-gray-900">IT301</div>
+                                    <div class="text-sm text-gray-600">Database Management</div>
+                                    <div class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">IT</div>
+                                    <div class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">III Year</div>
+                                </div>
+                                <button class="text-red-500 hover:text-red-700 transition-colors">
+                                    <i class="fas fa-trash text-sm"></i>
+                                </button>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                        
+                        <div class="text-center py-4" id="noSubjects" style="display: none;">
+                            <i class="fas fa-book text-3xl text-gray-300 mb-2"></i>
+                            <p class="text-sm text-gray-500">No subjects added yet</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: SubjectManagement -->
+
+                <!-- Step 4: Exam Period & Settings -->
+                <!-- @COMPONENT: ExamSettings [startDate, endDate, examDuration, excludeDays] -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center">
+                            <span class="text-sm font-medium">4</span>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-900">Exam Period & Settings</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                            <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" 
+                                   value="2025-08-04" data-bind="startDate" />
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                            <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" 
+                                   value="2025-08-08" data-bind="endDate" />
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Exam Duration</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" data-bind="examDuration">
+                                <option>08:00 AM to 09:30 AM</option>
+                                <option>10:00 AM to 11:30 AM</option>
+                                <option>02:00 PM to 03:30 PM</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Exclude Days</label>
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" checked />
+                                    <span class="text-sm text-gray-700">Sundays</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" />
+                                    <span class="text-sm text-gray-700">Saturdays</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <button class="w-full bg-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium" 
+                                data-event="click:generateTimetable">
+                            <i class="fas fa-magic mr-2"></i>Generate Timetable
+                        </button>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: ExamSettings -->
+            </div>
+
+            <!-- Timetable Preview Section -->
+            <!-- @COMPONENT: TimetablePreview [generatedTimetable, conflicts] -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-8 space-y-6">
+                    <!-- Preview Header -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Timetable Preview</h3>
+                            <div class="flex items-center space-x-2">
+                                <button class="text-gray-500 hover:text-gray-700" data-event="click:refreshPreview">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button class="text-gray-500 hover:text-gray-700" data-event="click:expandPreview">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- University Header Mock -->
+                        <div class="text-center mb-4 pb-4 border-b border-gray-200">
+                            <h4 class="text-sm font-bold text-gray-900">CHENNAI INSTITUTE OF TECHNOLOGY</h4>
+                            <p class="text-xs text-gray-600">(Autonomous)</p>
+                            <p class="text-xs font-medium text-gray-700 mt-1">OFFICE OF THE CONTROLLER OF EXAMINATIONS</p>
+                            <div class="flex justify-between text-xs text-gray-600 mt-2">
+                                <span>REF: CIT/COE/2025-26/ODD/04</span>
+                                <span>DATE: 03.08.2025</span>
+                            </div>
+                        </div>
+
+                        <!-- Exam Schedule Table -->
+                        <div class="mb-4">
+                            <h5 class="text-center text-sm font-semibold text-gray-900 mb-3">EXAM SCHEDULE</h5>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-xs border-collapse border border-gray-300">
+                                    <thead>
+                                        <tr class="bg-gray-50">
+                                            <th class="border border-gray-300 p-2 text-left font-medium">DATE</th>
+                                            <th class="border border-gray-300 p-2 text-left font-medium">CSE</th>
+                                            <th class="border border-gray-300 p-2 text-left font-medium">IT</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- @MAP: generatedTimetable.map(day => ( -->
+                                        <tr data-bind="day">
+                                            <td class="border border-gray-300 p-2 font-medium">04.08.2025</td>
+                                            <td class="border border-gray-300 p-2">
+                                                <div class="text-xs font-medium">CS301</div>
+                                                <div class="text-xs text-gray-600">Data Structures</div>
+                                            </td>
+                                            <td class="border border-gray-300 p-2">
+                                                <div class="text-xs font-medium">IT301</div>
+                                                <div class="text-xs text-gray-600">Database Management</div>
+                                            </td>
+                                        </tr>
+                                        <!-- @END_MAP )) -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div class="grid grid-cols-3 gap-4 mb-4">
+                            <div class="text-center">
+                                <div class="text-sm font-semibold text-gray-900" data-bind="totalSubjects">2</div>
+                                <div class="text-xs text-gray-600">Total Subjects</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-sm font-semibold text-gray-900" data-bind="examDays">1</div>
+                                <div class="text-xs text-gray-600">Exam Days</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-sm font-semibold text-success" data-bind="conflicts">0</div>
+                                <div class="text-xs text-gray-600">Conflicts</div>
+                            </div>
+                        </div>
+
+                        <!-- Conflict Warning -->
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4" id="conflictWarning" style="display: none;">
+                            <div class="flex items-start space-x-2">
+                                <i class="fas fa-exclamation-triangle text-warning text-sm mt-0.5"></i>
+                                <div>
+                                    <h6 class="text-sm font-medium text-warning">Scheduling Conflicts Detected</h6>
+                                    <p class="text-xs text-gray-700">Subjects with same name will be scheduled on the same date.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Success Message -->
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                            <div class="flex items-start space-x-2">
+                                <i class="fas fa-check-circle text-success text-sm mt-0.5"></i>
+                                <div>
+                                    <h6 class="text-sm font-medium text-success">Timetable Generated Successfully</h6>
+                                    <p class="text-xs text-gray-700">No conflicts detected. Ready for download.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Download PDF Button -->
+                        <button class="w-full bg-success text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium" 
+                                data-event="click:downloadPDF" data-implementation="Generate PDF using puppeteer or jspdf">
+                            <i class="fas fa-download mr-2"></i>Download PDF
+                        </button>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors" 
+                                    data-event="click:saveTemplate">
+                                <i class="fas fa-save text-gray-400"></i>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">Save as Template</div>
+                                    <div class="text-xs text-gray-500">Reuse this configuration</div>
+                                </div>
+                            </button>
+                            
+                            <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors" 
+                                    data-event="click:loadTemplate">
+                                <i class="fas fa-folder-open text-gray-400"></i>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">Load Template</div>
+                                    <div class="text-xs text-gray-500">Use saved configuration</div>
+                                </div>
+                            </button>
+                            
+                            <button class="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors" 
+                                    data-event="click:resetForm">
+                                <i class="fas fa-redo text-gray-400"></i>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">Reset Form</div>
+                                    <div class="text-xs text-gray-500">Start over</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: TimetablePreview -->
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <!-- @COMPONENT: LoadingOverlay [isLoading] -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="loadingOverlay">
+        <div class="bg-white rounded-xl p-8 text-center max-w-sm w-full mx-4">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Generating Timetable</h3>
+            <p class="text-sm text-gray-600">Please wait while we create your exam schedule...</p>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: LoadingOverlay -->
+
+    <script>
+        (function() {
+            // TODO: Implement React components for state management and API calls
+            // TODO: Add PostgreSQL integration for data persistence
+            // TODO: Implement conflict detection algorithm
+            // TODO: Add PDF generation using puppeteer or jspdf
+            // TODO: Implement Excel/CSV file parsing
+            
+            // Basic UI interactions for demo purposes
+            let currentStep = 1;
+            let subjects = [];
+            
+            // File upload handler
+            const handleBulkImport = () => {
+                const importArea = document.getElementById('importArea');
+                importArea.classList.toggle('hidden');
+            };
+            
+            // Add subject functionality
+            const addSubject = () => {
+                // TODO: Implement subject validation and addition to state
+                console.log('Add subject functionality');
+            };
+            
+            // Generate timetable functionality
+            const generateTimetable = () => {
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                loadingOverlay.classList.remove('hidden');
+                
+                // Simulate timetable generation
+                setTimeout(() => {
+                    loadingOverlay.classList.add('hidden');
+                    // TODO: Implement actual timetable generation algorithm
+                }, 2000);
+            };
+            
+            // PDF download functionality
+            const downloadPDF = () => {
+                // TODO: Implement PDF generation and download
+                console.log('Download PDF functionality');
+            };
+            
+            // File input trigger
+            const triggerFileUpload = () => {
+                document.getElementById('fileInput').click();
+            };
+            
+            // Event listeners setup
+            document.addEventListener('click', (e) => {
+                const target = e.target.closest('[data-event]');
+                if (!target) return;
+                
+                const event = target.getAttribute('data-event');
+                
+                switch(event) {
+                    case 'click:handleBulkImport':
+                        handleBulkImport();
+                        break;
+                    case 'click:addSubject':
+                        addSubject();
+                        break;
+                    case 'click:generateTimetable':
+                        generateTimetable();
+                        break;
+                    case 'click:downloadPDF':
+                        downloadPDF();
+                        break;
+                    case 'click:triggerFileUpload':
+                        triggerFileUpload();
+                        break;
+                }
+            });
+            
+            // File input change handler
+            document.getElementById('fileInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    // TODO: Implement file parsing for Excel/CSV
+                    console.log('File selected:', file.name);
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
