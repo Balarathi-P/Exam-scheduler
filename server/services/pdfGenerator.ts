@@ -1,76 +1,36 @@
-import puppeteer from 'puppeteer';
-// @ts-ignore
-import * as htmlPdf from 'html-pdf-node';
+import PDFDocument from 'pdfkit';
 import { Timetable, TimetableSubject, Subject } from '@shared/schema';
 
 export async function generatePDF(
   timetable: Timetable, 
   timetableSubjects: (TimetableSubject & { subject: Subject })[]
 ): Promise<Buffer> {
-  const html = generateTimetableHTML(timetable, timetableSubjects);
-  
-  try {
-    // Try Puppeteer first
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor'
-      ]
-    });
-    
+  return new Promise((resolve, reject) => {
     try {
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      const doc = new PDFDocument({ size: 'A4', margin: 50 });
+      const buffers: Buffer[] = [];
       
-      const pdfBuffer = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        margin: {
-          top: '20mm',
-          right: '15mm',
-          bottom: '20mm',
-          left: '15mm'
-        }
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => {
+        const pdfData = Buffer.concat(buffers);
+        resolve(pdfData);
       });
+
+      // Generate the PDF content
+      generatePDFContent(doc, timetable, timetableSubjects);
       
-      return Buffer.from(pdfBuffer);
-    } finally {
-      await browser.close();
+      doc.end();
+    } catch (error) {
+      reject(error);
     }
-  } catch (puppeteerError: any) {
-    console.log('Puppeteer failed, trying html-pdf-node fallback:', puppeteerError?.message || puppeteerError);
-    
-    // Fallback to html-pdf-node
-    const options = {
-      format: 'A4',
-      margin: {
-        top: '20mm',
-        right: '15mm',
-        bottom: '20mm',
-        left: '15mm'
-      },
-      printBackground: true
-    };
-    
-    const file = { content: html };
-    const pdfBuffer = await htmlPdf.generatePdf(file, options);
-    return Buffer.from(pdfBuffer);
-  }
+  });
 }
 
-function generateTimetableHTML(
+function generatePDFContent(
+  doc: any,
   timetable: Timetable, 
   timetableSubjects: (TimetableSubject & { subject: Subject })[]
-): string {
+) {
   // Group subjects by date and department
   const scheduleByDate: { [date: string]: { [dept: string]: (TimetableSubject & { subject: Subject })[] } } = {};
   const departments = new Set<string>();
@@ -88,182 +48,128 @@ function generateTimetableHTML(
   
   const sortedDates = Object.keys(scheduleByDate).sort();
   const sortedDepartments = Array.from(departments).sort();
-  
   const currentDate = new Date().toLocaleDateString('en-GB');
+
+  let yPosition = 80;
   
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 20px;
-          font-size: 12px;
-        }
-        
-        .header {
-          text-align: center;
-          margin-bottom: 30px;
-          border-bottom: 2px solid #000;
-          padding-bottom: 20px;
-        }
-        
-        .header h1 {
-          font-size: 18px;
-          font-weight: bold;
-          margin: 0 0 5px 0;
-        }
-        
-        .header h2 {
-          font-size: 14px;
-          margin: 0 0 10px 0;
-        }
-        
-        .header-info {
-          display: flex;
-          justify-content: space-between;
-          margin-top: 15px;
-          font-size: 11px;
-        }
-        
-        .schedule-title {
-          text-align: center;
-          font-size: 14px;
-          font-weight: bold;
-          margin: 20px 0;
-        }
-        
-        .timetable {
-          width: 100%;
-          border-collapse: collapse;
-          margin-bottom: 30px;
-        }
-        
-        .timetable th,
-        .timetable td {
-          border: 1px solid #000;
-          padding: 8px 4px;
-          text-align: left;
-          vertical-align: top;
-          font-size: 10px;
-        }
-        
-        .timetable th {
-          background-color: #f0f0f0;
-          font-weight: bold;
-          text-align: center;
-        }
-        
-        .date-column {
-          width: 80px;
-          font-weight: bold;
-        }
-        
-        .subject-code {
-          font-weight: bold;
-          font-size: 9px;
-        }
-        
-        .subject-name {
-          font-size: 9px;
-          color: #666;
-        }
-        
-        .notes {
-          margin-top: 30px;
-          font-size: 10px;
-        }
-        
-        .notes h4 {
-          margin: 0 0 10px 0;
-          font-size: 11px;
-        }
-        
-        .signature-section {
-          margin-top: 50px;
-          display: flex;
-          justify-content: space-between;
-        }
-        
-        .signature-box {
-          text-align: center;
-          font-size: 10px;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>CHENNAI INSTITUTE OF TECHNOLOGY</h1>
-        <p style="font-size: 12px; margin: 5px 0;">(Autonomous)</p>
-        <p style="font-size: 12px; margin: 5px 0;">Autonomous Institution, Affiliated to Anna University, Chennai</p>
-        <h2>OFFICE OF THE CONTROLLER OF EXAMINATIONS</h2>
-        
-        <div class="header-info">
-          <span>REF: ${timetable.referenceNumber || 'CIT/COE/2025-26/ODD/04'}</span>
-          <span>DATE: ${currentDate}</span>
-        </div>
-      </div>
+  // Header - University Name
+  doc.fontSize(16).font('Helvetica-Bold');
+  doc.text('CHENNAI INSTITUTE OF TECHNOLOGY', 0, yPosition, { align: 'center' });
+  yPosition += 20;
+  
+  doc.fontSize(12).font('Helvetica');
+  doc.text('(Autonomous)', 0, yPosition, { align: 'center' });
+  yPosition += 15;
+  
+  doc.fontSize(10);
+  doc.text('Autonomous Institution, Affiliated to Anna University, Chennai', 0, yPosition, { align: 'center' });
+  yPosition += 25;
+  
+  doc.fontSize(14).font('Helvetica-Bold');
+  doc.text('OFFICE OF THE CONTROLLER OF EXAMINATIONS', 0, yPosition, { align: 'center' });
+  yPosition += 30;
+  
+  // Reference and Date
+  doc.fontSize(10).font('Helvetica');
+  doc.text(`REF: ${timetable.referenceNumber || 'CIT/COE/2025-26/ODD/04'}`, 50, yPosition);
+  doc.text(`DATE: ${currentDate}`, 450, yPosition);
+  yPosition += 30;
+  
+  // Draw line
+  doc.moveTo(50, yPosition).lineTo(545, yPosition).stroke();
+  yPosition += 30;
+  
+  // CIRCULAR title
+  doc.fontSize(14).font('Helvetica-Bold');
+  doc.text('CIRCULAR', 0, yPosition, { align: 'center' });
+  yPosition += 25;
+  
+  // Circular content
+  doc.fontSize(10).font('Helvetica');
+  const circularText = `The ${timetable.examType} Exam for ${sortedDepartments.join(', ')} students starts from ${timetable.startDate} onwards. All the students are hereby informing to take the exams seriously. The marks secured in these tests will be considered for awarding the internal marks. The schedule for the exams is as follows.`;
+  doc.text(circularText, 50, yPosition, { width: 495, align: 'justify' });
+  yPosition += 50;
+  
+  // Table
+  const tableStartY = yPosition;
+  const tableWidth = 495;
+  const colWidth = tableWidth / (sortedDepartments.length + 1);
+  const rowHeight = 25;
+  
+  // Table header
+  doc.fontSize(10).font('Helvetica-Bold');
+  
+  // Header row
+  doc.rect(50, yPosition, colWidth, rowHeight).stroke();
+  doc.text('DATE', 50 + 5, yPosition + 8, { width: colWidth - 10, align: 'center' });
+  
+  sortedDepartments.forEach((dept, index) => {
+    const x = 50 + (index + 1) * colWidth;
+    doc.rect(x, yPosition, colWidth, rowHeight).stroke();
+    doc.text(dept, x + 5, yPosition + 8, { width: colWidth - 10, align: 'center' });
+  });
+  
+  yPosition += rowHeight;
+  
+  // Data rows
+  doc.font('Helvetica');
+  sortedDates.forEach(date => {
+    const startY = yPosition;
+    
+    // Date column
+    doc.rect(50, yPosition, colWidth, rowHeight).stroke();
+    doc.fontSize(9).font('Helvetica-Bold');
+    doc.text(date, 50 + 5, yPosition + 8, { width: colWidth - 10, align: 'center' });
+    
+    // Department columns
+    sortedDepartments.forEach((dept, index) => {
+      const x = 50 + (index + 1) * colWidth;
+      doc.rect(x, yPosition, colWidth, rowHeight).stroke();
       
-      <div style="text-align: center; margin-bottom: 20px;">
-        <h3 style="margin: 0; font-size: 14px;">CIRCULAR</h3>
-        <p style="font-size: 11px; margin: 10px 0;">
-          The ${timetable.examType} Exam for ${sortedDepartments.join(', ')} students starts from ${timetable.startDate} onwards. 
-          All the students are hereby informing to take the exams seriously. 
-          The marks secured in these tests will be considered for awarding the internal marks. 
-          The schedule for the exams is as follows.
-        </p>
-      </div>
+      const subjects = scheduleByDate[date]?.[dept] || [];
+      let subjectY = yPosition + 5;
       
-      <table class="timetable">
-        <thead>
-          <tr>
-            <th class="date-column">DATE</th>
-            ${sortedDepartments.map(dept => `<th>${dept}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>
-          ${sortedDates.map(date => `
-            <tr>
-              <td class="date-column">${date}</td>
-              ${sortedDepartments.map(dept => {
-                const subjects = scheduleByDate[date][dept] || [];
-                return `<td>
-                  ${subjects.map(ts => `
-                    <div class="subject-code">${ts.subject.code}</div>
-                    <div class="subject-name">${ts.subject.name}</div>
-                  `).join('')}
-                </td>`;
-              }).join('')}
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-      
-      <div class="notes">
-        <h4>Note:</h4>
-        <p>1. Exam Duration: ${timetable.examDuration}</p>
-        <p>2. Students should be available inside the respective exam halls at 07:45 AM.</p>
-        <p>3. Seating arrangement will be displayed in the notice board just before the day of first Exam.</p>
-      </div>
-      
-      <div style="margin-top: 40px;">
-        <p style="font-size: 10px; margin-bottom: 30px;">Copy To:</p>
-        <p style="font-size: 10px;">1. The head of the department &nbsp;&nbsp; 2. To be read in all classes. &nbsp;&nbsp; 3. Main notice board &nbsp;&nbsp; 4. File copy.</p>
-      </div>
-      
-      <div class="signature-section">
-        <div class="signature-box" style="margin-top: 60px;">
-          <div style="border-bottom: 1px solid #000; width: 200px; margin-bottom: 5px;"></div>
-          <p><strong>Dr. A. PRINCIPAL, M.E., Ph.D.,</strong></p>
-          <p>Principal</p>
-          <p><strong>CHENNAI INSTITUTE OF TECHNOLOGY</strong></p>
-          <p>(AUTONOMOUS)</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+      subjects.forEach(ts => {
+        doc.fontSize(8).font('Helvetica-Bold');
+        doc.text(ts.subject.code, x + 3, subjectY, { width: colWidth - 6 });
+        subjectY += 10;
+        doc.fontSize(7).font('Helvetica');
+        doc.text(ts.subject.name, x + 3, subjectY, { width: colWidth - 6 });
+        subjectY += 12;
+      });
+    });
+    
+    yPosition += rowHeight;
+  });
+  
+  yPosition += 30;
+  
+  // Notes
+  doc.fontSize(10).font('Helvetica-Bold');
+  doc.text('Note:', 50, yPosition);
+  yPosition += 15;
+  
+  doc.fontSize(9).font('Helvetica');
+  doc.text(`1. Exam Duration: ${timetable.examDuration}`, 50, yPosition);
+  yPosition += 12;
+  doc.text('2. Students should be available inside the respective exam halls at 07:45 AM.', 50, yPosition);
+  yPosition += 12;
+  doc.text('3. Seating arrangement will be displayed in the notice board just before the day of first Exam.', 50, yPosition);
+  yPosition += 30;
+  
+  // Copy To
+  doc.text('Copy To:', 50, yPosition);
+  yPosition += 15;
+  doc.text('1. The head of the department    2. To be read in all classes.    3. Main notice board    4. File copy.', 50, yPosition);
+  yPosition += 60;
+  
+  // Signature
+  doc.fontSize(10).font('Helvetica-Bold');
+  doc.text('Dr. A. PRINCIPAL, M.E., Ph.D.,', 400, yPosition);
+  yPosition += 12;
+  doc.text('Principal', 400, yPosition);
+  yPosition += 12;
+  doc.text('CHENNAI INSTITUTE OF TECHNOLOGY', 400, yPosition);
+  yPosition += 12;
+  doc.text('(AUTONOMOUS)', 400, yPosition);
 }
