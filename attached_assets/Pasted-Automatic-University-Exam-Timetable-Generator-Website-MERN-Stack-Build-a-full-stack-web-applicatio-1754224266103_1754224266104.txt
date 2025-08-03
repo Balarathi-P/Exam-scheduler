@@ -1,0 +1,88 @@
+Automatic University Exam Timetable Generator Website (MERN Stack)
+Build a full-stack web application titled “Automatic University Exam Timetable Generator” using the MERN stack (MongoDB, Express.js, React.js, Node.js).
+
+🎯 Key Functional Requirements:
+Department & Year Selection:
+
+UI for users to select the department (e.g., CSE, ECE, MECH, etc.).
+
+Then select the year (e.g., I, II, III, IV).
+
+Subject Entry:
+
+Allow dynamic input or dropdown to enter multiple subjects:
+
+Subject Code
+
+Subject Name
+
+Department (optional override)
+
+Users can add multiple subjects.
+
+Time Period Selection:
+
+Allow input of Start Date and End Date for the exam period.
+
+Automatically calculate available dates between the range, skipping weekends or custom holidays if needed (optional).
+
+Scheduling Logic (Backend):
+
+Generate a conflict-free timetable:
+
+No subject with the same subject name should appear more than once (even if the codes differ).
+
+Prevent scheduling multiple exams on the same day for the same department/year.
+
+Ensure all subjects are scheduled between the given dates.
+
+Timetable Output Format:
+
+Render a table with:
+
+Date, Day, Subject Code, Subject Name, Department, Year
+
+Format example:
+
+sql
+Copy
+Edit
+Date       | Day       | Subject Code | Subject Name         | Dept  | Year
+------------------------------------------------------------------------------
+10-12-2025 | Tuesday   | CS301        | Data Structures       | CSE   | III
+11-12-2025 | Wednesday | EC302        | Data Structures       | ECE   | III
+PDF Generation:
+
+Provide a “Download PDF” button to generate the timetable as a printable PDF file.
+
+Use libraries like:
+
+puppeteer or html-pdf-node (for backend PDF generation).
+
+Or jspdf (for client-side).
+
+Database (MongoDB or PostgreSQL):
+
+Store:
+
+Subject data (subject code, name, dept, year)
+
+Generated timetables
+
+User input history (optional)
+
+🧠 Tech Stack:
+Frontend: React.js + TailwindCSS or Material-UI
+
+Backend: Node.js + Express.js
+
+Database:
+
+Default: MongoDB (for easier JSON-based schema handling)
+
+Alternative: PostgreSQL (if you prefer relational design)
+
+PDF Generator: puppeteer, html-pdf-node, or jspdf
+
+Deployment: Vercel (Frontend), Render / Railway / Heroku (Backend), MongoDB Atlas or PostgreSQL (Neon, Supabase)
+
